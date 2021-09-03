@@ -20,7 +20,14 @@ namespace AdoNetEjemplo1
                 MostrarClientes(con);
                 
                 IDbCommand com = con.CreateCommand();
-                com.CommandText = "SELECT * FROM Clientes WHERE ClienteId = 1";
+                com.CommandText = "SELECT * FROM Clientes WHERE ClienteId = @Id";
+                
+                IDbDataParameter parId = com.CreateParameter();
+                parId.ParameterName = "Id";
+                parId.DbType = DbType.Int64;
+                parId.Value = 1;
+                com.Parameters.Add(parId);
+
                 using (IDataReader dr = com.ExecuteReader())
                 {
                     if (dr.Read())
@@ -29,17 +36,46 @@ namespace AdoNetEjemplo1
                     }
                 }
 
-                com.CommandText = "INSERT INTO Clientes (Nombre, Apellidos, FechaNacimiento) VALUES ('Nuevo', 'Nuevez', '2000-01-02')";
+                com.CommandText = "INSERT INTO Clientes (Nombre, Apellidos, FechaNacimiento) VALUES (@Nombre, @Apellidos, @FechaNacimiento)";
+
+                IDbDataParameter parNombre = com.CreateParameter();
+                parNombre.ParameterName = "Nombre";
+                parNombre.DbType = DbType.String;
+                com.Parameters.Add(parNombre);
+
+                IDbDataParameter parApellidos = com.CreateParameter();
+                parApellidos.ParameterName = "Apellidos";
+                parApellidos.DbType = DbType.String;
+                com.Parameters.Add(parApellidos);
+
+                IDbDataParameter parFechaNacimiento = com.CreateParameter();
+                parFechaNacimiento.ParameterName = "FechaNacimiento";
+                parFechaNacimiento.DbType = DbType.Date;
+                com.Parameters.Add(parFechaNacimiento);
+
+                parNombre.Value = "Nuevazo";
+                parApellidos.Value = "Nuevecez";
+                parFechaNacimiento.Value = DateTime.Now;
+                
                 com.ExecuteNonQuery();
 
                 MostrarClientes(con);
 
-                com.CommandText = "UPDATE Clientes SET Nombre='Modificado',Apellidos='Modificadez', FechaNacimiento='2002-02-02' WHERE ClienteId=4";
+                com.CommandText = "UPDATE Clientes SET Nombre=@Nombre,Apellidos=@Apellidos, FechaNacimiento=@FechaNacimiento WHERE ClienteId=@Id";
+
+                parId.Value = 4;
+                parNombre.Value = "Supermodificado";
+                parApellidos.Value = "Supermodificadez";
+                parFechaNacimiento.Value = DateTime.Now;
+
                 com.ExecuteNonQuery();
 
                 MostrarClientes(con);
 
-                com.CommandText = "DELETE FROM Clientes WHERE ClienteId = 3";
+                com.CommandText = "DELETE FROM Clientes WHERE ClienteId = @Id";
+
+                parId.Value = 2;
+
                 com.ExecuteNonQuery();
 
                 MostrarClientes(con);
