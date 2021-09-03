@@ -13,15 +13,50 @@ namespace AdoNetEjemplo1
     {
         static void Main(string[] args)
         {
-            IDbConnection con = new SqlConnection(@"Data Source=localhost\SQLEXPRESS;Initial Catalog=mf0966;Integrated Security=True"); //@"Server=localhost\SQLEXPRESS;Database=mf0966;Trusted_Connection=True;");
+            using (IDbConnection con = new SqlConnection(@"Data Source=localhost\SQLEXPRESS;Initial Catalog=mf0966;Integrated Security=True")) //@"Server=localhost\SQLEXPRESS;Database=mf0966;Trusted_Connection=True;");
+            {
+                con.Open();
+                
+                MostrarClientes(con);
+                
+                IDbCommand com = con.CreateCommand();
+                com.CommandText = "SELECT * FROM Clientes WHERE ClienteId = 1";
+                using (IDataReader dr = com.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        Console.WriteLine($"{dr["ClienteId"]}, {dr["Nombre"]}, {dr["Apellidos"]}, {dr["FechaNacimiento"]}");
+                    }
+                }
+
+                com.CommandText = "INSERT INTO Clientes (Nombre, Apellidos, FechaNacimiento) VALUES ('Nuevo', 'Nuevez', '2000-01-02')";
+                com.ExecuteNonQuery();
+
+                MostrarClientes(con);
+
+                com.CommandText = "UPDATE Clientes SET Nombre='Modificado',Apellidos='Modificadez', FechaNacimiento='2002-02-02' WHERE ClienteId=4";
+                com.ExecuteNonQuery();
+
+                MostrarClientes(con);
+
+                com.CommandText = "DELETE FROM Clientes WHERE ClienteId = 3";
+                com.ExecuteNonQuery();
+
+                MostrarClientes(con);
+            } // con.Close();
+        }
+
+        private static void MostrarClientes(IDbConnection con)
+        {
             IDbCommand com = con.CreateCommand();
             com.CommandText = "SELECT * FROM Clientes";
-            con.Open();
-            IDataReader dr = com.ExecuteReader();
-            
-            while(dr.Read())
+
+            using (IDataReader dr = com.ExecuteReader())
             {
-                Console.WriteLine($"{dr["ClienteId"]}, {dr["Nombre"]}, {dr["Apellidos"]}, {dr["FechaNacimiento"]}");
+                while (dr.Read())
+                {
+                    Console.WriteLine($"{dr["ClienteId"]}, {dr["Nombre"]}, {dr["Apellidos"]}, {dr["FechaNacimiento"]}");
+                }
             }
         }
     }
